@@ -1,0 +1,90 @@
+name: Build
+
+on: [push]
+
+jobs:
+  build-opencv:
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.13'
+    - name: Build OpenCV XCFramework
+      run: |
+        python3 ./opencv/platforms/apple/build_xcframework.py \
+          --out ./opencv/build \
+          --iphoneos_deployment_target 14.0 \
+          --iphoneos_archs arm64 \
+          --iphonesimulator_archs arm64,x86_64 \
+          --build_only_specified_archs True \
+          --dynamic \
+          --without objc
+        zip -r opencv2.xcframework.zip ./opencv/build/opencv2.xcframework
+    - name: Upload OpenCV XCFramework
+      uses: actions/upload-artifact@v4
+      with:
+        name: opencv2.xcframework
+        path: opencv2.xcframework.zip
+
+  build-onnx:
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.13'
+    - name: Build ONNX Runtime XCFramework
+      run: |
+        CMAKE_POLICY_VERSION_MINIMUM=3.5 python3 ./onnx/tools/ci_build/github/apple/build_and_assemble_apple_pods.py \
+          --staging-dir ./onnx/build \
+          --build-settings-file ./onnx_ios_build_settings.json
+        zip -r onnxruntime.xcframework.zip ./onnx/build/onnxruntime.xcframework
+    - name: Upload ONNX Runtime XCFramework
+      uses: actions/upload-artifact@v4
+      with:
+        name: onnxruntime.xcframework
+        path: onnxruntime.xcframework.zip
+
+  release:
+    needs: [build-opencv, build-onnx]
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - name: Configure Git user
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+    - name: Download OpenCV XCFramework
+      uses: actions/download-artifact@v4
+      with:
+        name: opencv2.xcframework
+    - name: Download ONNX Runtime XCFramework
+      uses: actions/download-artifact@v4
+      with:
+        name: onnxruntime.xcframework
+    - name: Create and push tag
+      run: |
+        # Example: create an annotated tag using the current run number
+        VERSION="v${{ github.run_number }}"
+        git tag -a $VERSION -m "Release $VERSION"
+        git push origin $VERSION
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          opencv2.xcframework.zip
+          onnxruntime.xcframework.zip
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
