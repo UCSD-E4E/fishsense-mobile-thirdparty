@@ -62,13 +62,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-    - name: Configure Git user
-      run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
     - name: Download OpenCV XCFramework
       uses: actions/download-artifact@v4
       with:
@@ -77,12 +70,6 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: onnxruntime.xcframework
-    - name: Create and push tag
-      run: |
-        # Example: create an annotated tag using the current run number
-        VERSION="v${{ github.run_number }}"
-        git tag -a $VERSION -m "Release $VERSION"
-        git push origin $VERSION
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
