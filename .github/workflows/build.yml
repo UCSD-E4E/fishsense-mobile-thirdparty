@@ -47,7 +47,7 @@ jobs:
         CMAKE_POLICY_VERSION_MINIMUM=3.5 python3 ./onnxruntime/tools/ci_build/github/apple/build_and_assemble_apple_pods.py \
           --staging-dir ./onnxruntime/build \
           --build-settings-file ./onnxruntime_ios_build_settings.json
-        zip -r onnxruntime.xcframework.zip ./onnxruntime/build/onnxruntime.xcframework
+        zip -r onnxruntime.xcframework.zip ./onnxruntime/build/onnxruntime-c/onnxruntime.xcframework
     - name: Upload ONNX Runtime XCFramework
       uses: actions/upload-artifact@v4
       with:
