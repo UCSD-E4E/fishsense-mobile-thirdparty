@@ -26,7 +26,7 @@ jobs:
           --without objc
         zip -r opencv2.xcframework.zip ./opencv/build/opencv2.xcframework
     - name: Upload OpenCV XCFramework
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: opencv2.xcframework
         path: opencv2.xcframework.zip
