@@ -50,12 +50,22 @@ jobs:
         CMAKE_POLICY_VERSION_MINIMUM=3.5 python3 ./onnxruntime/tools/ci_build/github/apple/build_and_assemble_apple_pods.py \
           --staging-dir ./onnxruntime/build \
           --build-settings-file ./onnxruntime_ios_build_settings.json
-        cd ./onnxruntime/build/onnxruntime-c/onnxruntime.xcframework && zip -r ../../../../onnxruntime.xcframework.zip *
+        pushd ./onnxruntime/build/onnxruntime-c/onnxruntime.xcframework
+        zip -r ../../../../onnxruntime.xcframework.zip *
+        popd
+        pushd ./onnxruntime
+        zip -r build ../onnxruntime-build.zip
+        popd
     - name: Upload ONNX Runtime XCFramework
       uses: actions/upload-artifact@v4
       with:
         name: onnxruntime.xcframework
         path: onnxruntime.xcframework.zip
+    - name: Upload ONNX Runtime Build Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: onnxruntime-build
+        path: onnxruntime-build.zip
 
   release:
     needs: [build-opencv, build-onnx]
@@ -70,11 +80,16 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: onnxruntime.xcframework
+    - name: Download ONNX Runtime Build Artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: onnxruntime-build
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
         files: |
           opencv2.xcframework.zip
           onnxruntime.xcframework.zip
+          onnxruntime-build.zip
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
