@@ -54,7 +54,7 @@ jobs:
         zip -r ../../../../onnxruntime.xcframework.zip *
         popd
         pushd ./onnxruntime
-        zip -r build ../onnxruntime-build.zip
+        zip -r ../onnxruntime-build.zip build
         popd
     - name: Upload ONNX Runtime XCFramework
       uses: actions/upload-artifact@v4
