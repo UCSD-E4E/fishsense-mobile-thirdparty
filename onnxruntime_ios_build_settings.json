@@ -20,13 +20,13 @@
             "--ios",
             "--use_xcode",
             "--use_xnnpack",
-            "--apple_deploy_target=13.0"
+            "--apple_deploy_target=17.0"
         ],
         "iphonesimulator": [
             "--ios",
             "--use_xcode",
             "--use_xnnpack",
-            "--apple_deploy_target=13.0"
+            "--apple_deploy_target=17.0"
         ]
     }
 }
