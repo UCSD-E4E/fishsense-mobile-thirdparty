@@ -21,7 +21,7 @@ jobs:
       run: |
         python3 ./opencv/platforms/apple/build_xcframework.py \
           --out ./opencv/build \
-          --iphoneos_deployment_target 16.0 \
+          --iphoneos_deployment_target 17.0 \
           --iphoneos_archs arm64 \
           --iphonesimulator_archs arm64,x86_64 \
           --build_only_specified_archs True \
@@ -50,6 +50,19 @@ jobs:
         CMAKE_POLICY_VERSION_MINIMUM=3.5 python3 ./onnxruntime/tools/ci_build/github/apple/build_and_assemble_apple_pods.py \
           --staging-dir ./onnxruntime/build \
           --build-settings-file ./onnxruntime_ios_build_settings.json
+        find ./onnxruntime/build/onnxruntime-c/onnxruntime.xcframework -name "Info.plist" | while read plist; do
+          python3 -c "
+import plistlib
+import sys
+path = sys.argv[1]
+with open(path, 'rb') as f:
+    data = plistlib.load(f)
+data['MinimumOSVersion'] = '17.0'
+with open(path, 'wb') as f:
+    plistlib.dump(data, f)
+print('Patched {}'.format(path))
+" "$plist"
+        done
         cd ./onnxruntime/build/onnxruntime-c/onnxruntime.xcframework && zip -r ../../../../onnxruntime.xcframework.zip *
     - name: Upload ONNX Runtime XCFramework
       uses: actions/upload-artifact@v4
