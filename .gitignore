@@ -61,7 +61,7 @@ CMakeUserPresets.json
 .LSOverride
 
 # Icon must end with two \r
-Icon
+Icon
 
 # Thumbnails
 ._*
@@ -103,3 +103,11 @@ Cargo.lock
 *.pdb
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,c++,cmake,rust
+
+### Nix / dev environment ###
+result
+result-*
+.direnv/
+
+### Python venv (for the upstream build scripts) ###
+.venv/

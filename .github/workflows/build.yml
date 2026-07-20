@@ -18,12 +18,20 @@ jobs:
       with:
         python-version: '3.13'
     - name: Build OpenCV XCFramework
+      # OpenCV's CPU_BASELINE=DETECT enables the NEON_FP16 code paths but its iOS
+      # Xcode toolchain never emits the matching -march=...+fp16 flag. AppleClang
+      # (Xcode 26+) hard-errors on the resulting target-feature mismatch in
+      # modules/dnn. Supply the flag, scoped to the arm64 slices via -Xarch_arm64
+      # so the x86_64 simulator build ignores it. Harmless on older toolchains.
+      env:
+        CFLAGS: "-Xarch_arm64 -march=armv8.2-a+fp16"
+        CXXFLAGS: "-Xarch_arm64 -march=armv8.2-a+fp16"
       run: |
         python3 ./opencv/platforms/apple/build_xcframework.py \
           --out ./opencv/build \
           --iphoneos_deployment_target 17.0 \
           --iphoneos_archs arm64 \
-          --iphonesimulator_archs arm64,x86_64 \
+          --iphonesimulator_archs arm64 \
           --build_only_specified_archs True \
           --dynamic \
           --without objc
