@@ -1,13 +1,12 @@
 {
-  description = "Build environment for FishSense mobile third-party frameworks (OpenCV + ONNX Runtime)";
+  description = "Build environment for FishSense mobile third-party framework (ONNX Runtime)";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     # Pinned only for CMake: nixos-unstable ships CMake 4.x, whose Xcode-generator
-    # compiler-id detection returns "unknown" with OpenCV's iOS toolchain file on
-    # recent Xcode, tripping OpenCV's "requires C++11" gate. CMake 3.30 (this
-    # channel) configures OpenCV + ONNX Runtime cleanly. Bump when unstable's
-    # CMake works with the Apple toolchains again.
+    # compiler-id detection misbehaves with the Apple iOS toolchains on recent
+    # Xcode. CMake 3.30 (this channel) configures the ONNX Runtime iOS build
+    # cleanly. Bump when unstable's CMake works with the Apple toolchains again.
     nixpkgs-cmake.url = "github:NixOS/nixpkgs/nixos-24.11";
     flake-utils.url = "github:numtide/flake-utils";
   };
@@ -33,7 +32,6 @@
         # (flatbuffers, numpy, protobuf, sympy, packaging). Bundling them here
         # means no venv / `pip install` step — the ONNX build.py only pip-installs
         # behind flags we don't use, so an immutable Nix interpreter is fine.
-        # OpenCV's Apple build needs only the interpreter itself.
         pythonEnv = pkgs.python313.withPackages (ps: with ps; [
           flatbuffers
           numpy
@@ -61,8 +59,8 @@
         # NDK/SDK genuinely live in nixpkgs (unlike Xcode), so this path can be
         # made fully hermetic. onnxruntime's build.py wants
         # <ndk>/build/cmake/android.toolchain.cmake; ANDROID_NDK_ROOT points there.
-        # Pin these versions to whatever OpenCV / ONNX Runtime require when the
-        # Android build actually lands.
+        # Pin these versions to whatever ONNX Runtime requires when the Android
+        # build actually lands.
         androidComposition = pkgs.androidenv.composeAndroidPackages {
           platformVersions = [ "34" ];
           buildToolsVersions = [ "34.0.0" ];
